@@ -6,26 +6,71 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 19:11:14 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/13 17:49:23 by tautin--         ###   ########.fr       */
+/*   Updated: 2024/12/17 20:47:28 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
+void	send_len(int pid, int len)
+{
+	int	i;
+
+	i = 0;
+
+	while (i < 32)
+	{
+		if (len & (1 << i))
+			kill(pid, SIGUSR1);
+		else
+			kill(pid, SIGUSR2);
+		i++;
+		usleep(100);
+	}
+}
+
+void	send_msg(int pid, const char *str)
+{
+	int				i;
+	int				index;
+	unsigned char	temp;
+
+	i = 0;
+	while (str[i])
+	{
+		index = 8;
+		temp = str[i];
+		while (index > 0)
+		{
+			index--;
+			if ((temp >> index) & 1)
+                kill(pid, SIGUSR1);
+            else
+                kill(pid, SIGUSR2);
+			usleep(100);
+		}
+		i++;
+	}
+}
+
 int	main(int ac, char **av)
 {
-	int		id;
-	char	*msg;
+	int			pid;
+	int			i;
+	const char	*msg;
 
+	i = 0;
 	if (ac == 3)
 	{
-		id = ft_atoi(av[1]);
-		if (!id)
-			return (ft_putstr_fd(message derreur));
+		pid = ft_atoi(av[1]);
+		if (!pid)
+			return (printf("PID incorrect"));
 		msg = av[2];
 		if (!msg)
-			return (ft_putstr_fd(message derreur));
-		send_msg(msg); // a faire
+			return (printf("Erreur avec le message"));
+		send_len(pid, strlen(msg));
+		send_msg(pid, msg);
 	}
-	return (ft_putstr_fd(message derreur)); // a faire
+	else
+		return (printf("Erreur format, entrez:\n\t./client <PID> <message>"));
 }
