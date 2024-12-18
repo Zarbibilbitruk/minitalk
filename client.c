@@ -6,7 +6,7 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 19:11:14 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/17 20:47:28 by tautin--         ###   ########.fr       */
+/*   Updated: 2024/12/18 15:24:55 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void	send_msg(int pid, const char *str)
 		{
 			index--;
 			if ((temp >> index) & 1)
-                kill(pid, SIGUSR1);
-            else
+				kill(pid, SIGUSR1);
+			else
                 kill(pid, SIGUSR2);
 			usleep(100);
 		}
@@ -63,7 +63,7 @@ int	main(int ac, char **av)
 	if (ac == 3)
 	{
 		pid = ft_atoi(av[1]);
-		if (!pid)
+		if (!pid || pid <= 5)
 			return (printf("PID incorrect"));
 		msg = av[2];
 		if (!msg)
