@@ -6,82 +6,89 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/13 17:46:45 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/18 15:36:07 by tautin--         ###   ########.fr       */
+/*   Updated: 2024/12/18 18:41:36 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	handle_len(int signal_recu, int index_bit, int *len)
+void	reset(t_data *data)
 {
-	static int	power = 1;
-
-	if (signal_recu == SIGUSR1)
-	{
-		*len += (1 * power);
-		power *= 2;
-	}
-	else
-	{
-		power *= 2;
-	}
-	if (index_bit == 31)
-		power = 1;
+	data->power = 1;
+	data->char_actuel = 0;
+	data->index_bit = 0;
 }
 
-void	handle_str(int signal_recu, char *str, int *len, int *trigger)
+int	handle_len(int signal_recu, t_data *data)
 {
-	static int				i = 0;
-	static unsigned char	char_actuel = 0;
-	static int				index_bit = 0;
-
-	char_actuel |= (signal_recu == SIGUSR1);
-	if (index_bit == 8)
+	if (signal_recu == SIGUSR1)
 	{
-		str[i] = char_actuel;
-		index_bit = 0;
-		char_actuel = 0;
-		i++;
+		data->len += (1 * data->power);
+		data->power *= 2;
+		// write(1, "1", 1);
 	}
 	else
-		char_actuel <<= 1;
-	index_bit++;
-	if (i == *len)
 	{
-		str[i] = '\0';
-		write(1, str, *len);
-		i = 0;
-		// *len = 0;
-		str = NULL;
-		*trigger = 1;
+		data->power *= 2;
+		// write(1, "0", 1);
 	}
+	return (data->len);
+}
+
+char	*handle_str(int signal_recu, t_data *data)
+{
+	static char	*str;
+
+	if(!str)
+	{
+		str = malloc(sizeof(char) * data->len + 1);
+		if (!str)
+			return (NULL);
+	}
+	if (signal_recu == SIGUSR1)
+	{
+		data->char_actuel += (1 * data->power);
+		data->power *= 2;
+	}
+	else
+		data->power *= 2;
+	data->index_bit++;
+	if (data->index_bit == 8)
+	{
+		str[data->i] = data->char_actuel;
+		data->char_actuel = 0;
+		data->power = 1;
+		data->i++;
+		data->index_bit = 0;
+	}
+	return (str);
 }
 
 void	handle_sig(int signal_recu)
 {
+	static t_data	data = {0, NULL, 0, 0, 1, 0};
 	static int	trigger = 1;
-	static int	len = 0;
-	static char	*str = NULL;
-	static int	index_bit = 0;
 
 	if (trigger == 1)
 	{
-		handle_len(signal_recu, index_bit, &len);
-		if (index_bit == 31)
+		handle_len(signal_recu, &data);
+		if (data.index_bit == 31)
 		{
+			reset(&data);
 			trigger--;
-			index_bit = 0;
 		}
-		index_bit++;
-	}
-	if(!str)
-	{
-		str = malloc(sizeof(char) * len + 1);
-		if (!str)
-			exit(EXIT_FAILURE);
 	}
 	if (trigger == 0)
-		handle_str(signal_recu, str, &len, &trigger);
+	{
+		data.str = handle_str(signal_recu, &data);
+		if(data.i == data.len)
+		{
+			printf("%s\n", data.str);
+			trigger = 1;
+			data.i = 0;
+			data.str = NULL;
+		}
+	}
 }
 
 int	main(void)

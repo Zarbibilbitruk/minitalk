@@ -6,7 +6,7 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/11 19:11:14 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/18 15:24:55 by tautin--         ###   ########.fr       */
+/*   Updated: 2024/12/18 17:55:20 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,21 @@ void	send_len(int pid, int len)
 	int	i;
 
 	i = 0;
-
+	write(1, "l", 1);
 	while (i < 32)
 	{
 		if (len & (1 << i))
+		{
 			kill(pid, SIGUSR1);
+			write(1, "1", 1);
+		}
 		else
+		{
 			kill(pid, SIGUSR2);
+			write(1, "0", 1);
+		}
 		i++;
-		usleep(100);
+		usleep(500);
 	}
 }
 
@@ -33,21 +39,26 @@ void	send_msg(int pid, const char *str)
 {
 	int				i;
 	int				index;
-	unsigned char	temp;
 
 	i = 0;
 	while (str[i])
 	{
-		index = 8;
-		temp = str[i];
-		while (index > 0)
+		write(1, "m", 1);
+		index = 0;
+		while (index < 8)
 		{
-			index--;
-			if ((temp >> index) & 1)
+			if (str[i] & (1 << index))
+			{
 				kill(pid, SIGUSR1);
+				write(1, "1", 1);
+			}
 			else
-                kill(pid, SIGUSR2);
-			usleep(100);
+            {
+				kill(pid, SIGUSR2);
+				write(1, "0", 1);
+			}
+			index++;
+			usleep(500);
 		}
 		i++;
 	}
