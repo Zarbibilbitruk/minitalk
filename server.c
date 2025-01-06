@@ -5,91 +5,98 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/13 17:46:45 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/18 15:36:07 by tautin--         ###   ########.fr       */
+/*   Created: 2025/01/06 19:02:39 by tautin--          #+#    #+#             */
+/*   Updated: 2025/01/06 19:21:24 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	handle_len(int signal_recu, int index_bit, int *len)
+void	next_step_struct(t_data *data)
 {
-	static int	power = 1;
+	data->power = 1;
+	data->value = 0;
+	data->index_bit = 0;
+	data->trigger--;
+}
 
-	if (signal_recu == SIGUSR1)
+int	get_length(int signum, t_data *data)
+{
+	if (signum == SIGUSR1)
 	{
-		*len += (1 * power);
-		power *= 2;
+		data->value += (1 * data->power);
+		data->power *= 2;
+	}
+	else
+		data->power *= 2;
+	data->index_bit++;
+	return (data->value);
+}
+
+char	*get_str(int signum, t_data *data)
+{
+	static char	*str;
+
+	if (str == NULL)
+	{
+		str = malloc(sizeof(char) * data->length + 1);
+		if (str == NULL)
+			return (NULL);
+	}
+	if (signum == SIGUSR1)
+	{
+		data->value += (1 * data->power);
+		data->power *= 2;
+	}
+	else
+		data->power *= 2;
+	data->index_bit++;
+	if (data->index_bit == 8)
+	{
+		str[data->i] = data->value;
+		data->value = 0;
+		data->power = 1;
+		data->i++;
+		data->index_bit = 0;
+	}
+	return (str);
+}
+
+void	srv_signal_handler(int signum)
+{
+	static t_data	data = {0, NULL, 0, 1, 0, 1, 0};
+
+	if (data.trigger == 1)
+	{
+		data.length = get_length(signum, &data);
+		if (data.index_bit == 32)
+			next_step_struct(&data);
 	}
 	else
 	{
-		power *= 2;
-	}
-	if (index_bit == 31)
-		power = 1;
-}
-
-void	handle_str(int signal_recu, char *str, int *len, int *trigger)
-{
-	static int				i = 0;
-	static unsigned char	char_actuel = 0;
-	static int				index_bit = 0;
-
-	char_actuel |= (signal_recu == SIGUSR1);
-	if (index_bit == 8)
-	{
-		str[i] = char_actuel;
-		index_bit = 0;
-		char_actuel = 0;
-		i++;
-	}
-	else
-		char_actuel <<= 1;
-	index_bit++;
-	if (i == *len)
-	{
-		str[i] = '\0';
-		write(1, str, *len);
-		i = 0;
-		// *len = 0;
-		str = NULL;
-		*trigger = 1;
-	}
-}
-
-void	handle_sig(int signal_recu)
-{
-	static int	trigger = 1;
-	static int	len = 0;
-	static char	*str = NULL;
-	static int	index_bit = 0;
-
-	if (trigger == 1)
-	{
-		handle_len(signal_recu, index_bit, &len);
-		if (index_bit == 31)
+		data.str = get_str(signum, &data);
+		if (data.i == data.length)
 		{
-			trigger--;
-			index_bit = 0;
+			write(1, data.str, data.length);
+			write(1, "\n", 1);
+			data.trigger = 1;
+			data.i = 0;
+			data.str = NULL;
 		}
-		index_bit++;
 	}
-	if(!str)
-	{
-		str = malloc(sizeof(char) * len + 1);
-		if (!str)
-			exit(EXIT_FAILURE);
-	}
-	if (trigger == 0)
-		handle_str(signal_recu, str, &len, &trigger);
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
-	printf("PID : %d\n", getpid());
-	signal(SIGUSR1, handle_sig);
-	signal(SIGUSR2, handle_sig);
+	if (!argv || argc > 1)
+	{
+		ft_printf("Pas d'argument autorise");
+		return (1);
+	}
+	signal(SIGUSR1, srv_signal_handler);
+	signal(SIGUSR2, srv_signal_handler);
+	ft_printf("PID : %i\n", getpid());
 	while (1)
 		pause();
-	return (EXIT_SUCCESS);
+	return (0);
 }

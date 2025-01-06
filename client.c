@@ -5,48 +5,49 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/11 19:11:14 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/18 15:24:55 by tautin--         ###   ########.fr       */
+/*   Created: 2025/01/06 18:43:05 by tautin--          #+#    #+#             */
+/*   Updated: 2025/01/06 19:10:06 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	send_len(int pid, int len)
+void	send_len(int len, int pid_srv)
 {
 	int	i;
 
 	i = 0;
-
 	while (i < 32)
 	{
 		if (len & (1 << i))
-			kill(pid, SIGUSR1);
+		{
+			kill(pid_srv, SIGUSR1);
+		}
 		else
-			kill(pid, SIGUSR2);
+		{
+			kill(pid_srv, SIGUSR2);
+		}
 		i++;
 		usleep(100);
 	}
 }
 
-void	send_msg(int pid, const char *str)
+void	send_msg(char *str, int pid_srv)
 {
-	int				i;
-	int				index;
-	unsigned char	temp;
+	int	i;
+	int	y;
 
 	i = 0;
 	while (str[i])
 	{
-		index = 8;
-		temp = str[i];
-		while (index > 0)
+		y = 0;
+		while (y < 8)
 		{
-			index--;
-			if ((temp >> index) & 1)
-				kill(pid, SIGUSR1);
+			if (str[i] & (1 << y))
+				kill(pid_srv, SIGUSR1);
 			else
-                kill(pid, SIGUSR2);
+				kill(pid_srv, SIGUSR2);
+			y++;
 			usleep(100);
 		}
 		i++;
@@ -55,22 +56,22 @@ void	send_msg(int pid, const char *str)
 
 int	main(int ac, char **av)
 {
-	int			pid;
-	int			i;
-	const char	*msg;
+	int		pid;
+	int		i;
+	char	*msg;
 
 	i = 0;
 	if (ac == 3)
 	{
 		pid = ft_atoi(av[1]);
 		if (!pid || pid <= 5)
-			return (printf("PID incorrect"));
+			return (ft_printf("PID incorrect"));
 		msg = av[2];
 		if (!msg)
-			return (printf("Erreur avec le message"));
-		send_len(pid, strlen(msg));
-		send_msg(pid, msg);
+			return (ft_printf("Erreur avec le message"));
+		send_len(ft_strlen(msg), pid);
+		send_msg(msg, pid);
 	}
 	else
-		return (printf("Erreur format, entrez:\n\t./client <PID> <message>"));
+		return (ft_printf("Erreur format, entrez:\n\t./client <PID> <message>"));
 }

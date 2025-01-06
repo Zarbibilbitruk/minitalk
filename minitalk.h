@@ -5,22 +5,36 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/11 19:11:41 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/17 19:41:48 by tautin--         ###   ########.fr       */
+/*   Created: 2025/01/06 15:31:07 by tautin--          #+#    #+#             */
+/*   Updated: 2025/01/06 19:20:58 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINITALK_H
 # define MINITALK_H
 
+# include "libft/libft.h"
 # include <signal.h>
-# include <unistd.h>
-# include <stdio.h>
 # include <stdlib.h>
-# include <string.h>
+# include <unistd.h>
 
-/*** fonctions ***/
-int		ft_atoi(const char *nptr);
-void	ft_putstr_fd(char *s, int fd);
+typedef struct s_data
+{
+	int		length;
+	char	*str;
+	int		index_bit;
+	int		trigger;
+	int		value;
+	int		power;
+	int		i;
+}			t_data;
+
+void		send_len(int len, int pid_srv);
+void		send_msg(char *str, int pid_srv);
+
+void		next_step_struct(t_data *data);
+int			get_length(int signum, t_data *data);
+char		*get_str(int signum, t_data *data);
+void		srv_signal_handler(int signum);
 
 #endif

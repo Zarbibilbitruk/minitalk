@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/17 14:10:19 by tautin--          #+#    #+#             */
-/*   Updated: 2024/12/17 14:13:40 by tautin--         ###   ########.fr       */
+/*   Created: 2024/05/20 10:42:09 by tautin--          #+#    #+#             */
+/*   Updated: 2024/05/23 16:29:46 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "libft.h"
 
 int	ft_atoi(const char *nptr)
 {
@@ -36,19 +36,4 @@ int	ft_atoi(const char *nptr)
 	}
 	num = num * signe;
 	return (num);
-}
-
-void	ft_putstr_fd(char *s, int fd)
-{
-	int	i;
-
-	i = 0;
-	if (s != NULL)
-	{
-		while (s[i])
-		{
-			write(fd, &s[i], 1);
-			i++;
-		}
-	}
 }
