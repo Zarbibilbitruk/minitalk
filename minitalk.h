@@ -6,7 +6,7 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 15:31:07 by tautin--          #+#    #+#             */
-/*   Updated: 2025/01/06 19:20:58 by tautin--         ###   ########.fr       */
+/*   Updated: 2025/01/07 16:47:24 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct s_data
 	int		trigger;
 	int		value;
 	int		power;
+	int		car;
 	int		i;
 }			t_data;
 
@@ -33,8 +34,8 @@ void		send_len(int len, int pid_srv);
 void		send_msg(char *str, int pid_srv);
 
 void		next_step_struct(t_data *data);
-int			get_length(int signum, t_data *data);
-char		*get_str(int signum, t_data *data);
+int			get_stuff(int signum, t_data *data);
+void		get_str(int signum, t_data *data);
 void		srv_signal_handler(int signum);
 
 #endif

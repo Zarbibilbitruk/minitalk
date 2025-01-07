@@ -6,7 +6,7 @@
 /*   By: tautin-- <tautin--@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 18:43:05 by tautin--          #+#    #+#             */
-/*   Updated: 2025/01/06 19:10:06 by tautin--         ###   ########.fr       */
+/*   Updated: 2025/01/07 17:05:16 by tautin--         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void	send_len(int len, int pid_srv)
 			kill(pid_srv, SIGUSR2);
 		}
 		i++;
-		usleep(100);
+		usleep(500);
 	}
 }
 
@@ -48,7 +48,7 @@ void	send_msg(char *str, int pid_srv)
 			else
 				kill(pid_srv, SIGUSR2);
 			y++;
-			usleep(100);
+			usleep(500);
 		}
 		i++;
 	}
